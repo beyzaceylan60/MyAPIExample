@@ -17,3 +17,7 @@ def register_user(payload: RegisterRequest):
         "full_name": payload.full_name,
         "password_hash": password_hash  # şimdilik gösteriyoruz (debug)
     }
+
+@router.post("/login", status_code=status.HTTP_200_OK)
+def login():
+    return {"message": "User login successfully"}
