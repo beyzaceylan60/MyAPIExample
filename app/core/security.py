@@ -1,27 +1,18 @@
 from passlib.context import CryptContext
+from datetime import datetime, timedelta
+from jose import jwt
+from app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
-# bcrypt + passlib uyumlu ayar
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
-)
-
-# bcrypt 72 byte limitine karşı güvenli truncate
-def _normalize_password(password: str) -> str:
-    return password[:72]
-
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str) -> str:
-    """
-    Plain password'u bcrypt ile hashler
-    """
-    normalized = _normalize_password(password)
-    return pwd_context.hash(normalized)
-
+    return pwd_context.hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Kullanıcının girdiği şifre ile hash'i karşılaştırır
-    """
-    normalized = _normalize_password(plain_password)
-    return pwd_context.verify(normalized, hashed_password)
+    return pwd_context.verify(plain_password, hashed_password)
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
